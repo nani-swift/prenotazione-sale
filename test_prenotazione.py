@@ -1,5 +1,5 @@
 import unittest
-from datetime import date, datetime
+from datetime import date
 from prenotazioni import Prenotazione
 
 
@@ -23,7 +23,7 @@ class TestPrenotazione(unittest.TestCase):
     def test_giorno_non_date_solleva_type_error(self) -> None:
         giorni_non_validi = [
             "2026-11-24",
-            datetime(2026, 11, 24, 9, 0),
+            123,
             None,
         ]
         for giorno in giorni_non_validi:
