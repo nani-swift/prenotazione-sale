@@ -1,41 +1,31 @@
 import unittest
-from datetime import date, time
-from prenotazioni import Agenda, Sala
+from datetime import date
+from prenotazioni import Agenda, ConflittoOrario, Prenotazione, Sala
 
 
 class TestSegnalazioni(unittest.TestCase):
     def setUp(self) -> None:
         self.agenda = Agenda()
-        self.sala = Sala(codice="A2", nome="Aula 2", capienza=10)
+        self.sala = Sala("A2", "Aula 2", 10)
         self.agenda.aggiungi_sala(self.sala)
         self.giorno = date(2026, 11, 24)
         self.oggi = date(2026, 11, 20)
 
     def test_prenotazioni_contigue_non_in_conflitto(self) -> None:
-        self.agenda.prenota(
-            sala_codice="A2",
-            giorno=self.giorno,
-            inizio=time(9, 0),
-            fine=time(10, 0),
-            referente="ALDO",
-            partecipanti=4,
-            oggi=self.oggi,
-        )
+        prima = Prenotazione("A2",self.giorno,"09:00","10:00","ALDO",4,)
+        seconda = Prenotazione("A2",self.giorno,"10:00","11:00","ANIR",5,)
+        self.agenda.prenota(prima, oggi=self.oggi)
 
-        prenotazione_successiva = self.agenda.prenota(
-            sala_codice="A2",
-            giorno=self.giorno,
-            inizio=time(10, 0),
-            fine=time(11, 0),
-            referente="ANIR",
-            partecipanti=5,
-            oggi=self.oggi,
-        )
+        try:
+            id_seconda = self.agenda.prenota(seconda, oggi=self.oggi)
+        except ConflittoOrario:
+            self.fail(
+                "Due prenotazioni contigue non devono sollevare ConflittoOrario"
+            )
 
-        self.assertEqual(prenotazione_successiva.inizio, time(10, 0))
-        self.assertEqual(prenotazione_successiva.fine, time(11, 0))
+        self.assertEqual(self.agenda.prenotazione(id_seconda).inizio, "10:00")
+        self.assertEqual(self.agenda.prenotazione(id_seconda).fine, "11:00")
 
 
 if __name__ == "__main__":
     unittest.main()
-    
